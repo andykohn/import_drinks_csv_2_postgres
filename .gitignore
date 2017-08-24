@@ -103,3 +103,8 @@ ENV/
 .mypy_cache/
 
 .DS_Store
+./csv/*
+*.csv
+./json/*
+*.json
+.git.bfg-report/

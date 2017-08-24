@@ -56,6 +56,19 @@ def __execute_sql(conn, sql):
         print(error)
 
 
+def __get_csv_files_from_s3():
+    s3 = boto3.resource('s3')
+
+    try:
+        s3.Bucket('drinkslistvir').download_file('csv/drinks.csv', DRINKS_CSV)
+        s3.Bucket('drinkslistvir').download_file('csv/ingredients.csv', INGREDIENTS_CSV)
+        s3.Bucket('drinkslistvir').download_file('csv/map_drink_ingredients.csv', MAP_DRINK_INGREDIENTS_CSV)
+    except ClientError as error:
+        if error.response['Error']['Code'] == "404":
+            print("The object does not exist.")
+        else:
+            raise
+
 def __execute_psql_copy(conn, csv, table_name, columns_name):
     try:
         print("Coping {}".format(table_name))
@@ -108,6 +121,7 @@ __execute_sql(__conn, CREATE_TABLE_INGREDIENTS)
 __execute_sql(__conn, CREATE_TABLE_DRINKS)
 __execute_sql(__conn, CREATE_TABLE_MAP_DRINK_INGREDIENTS)
 
+__get_csv_files_from_s3()
 __execute_psql_copy(__conn, INGREDIENTS_CSV, INGREDIENTS_TABLE, INGREDIENTS_COLUMNS)
 __execute_psql_copy(__conn, DRINKS_CSV, DRINKS_TABLE, DRINKS_COLUMNS)
 __execute_psql_copy(__conn, MAP_DRINK_INGREDIENTS_CSV, MAP_DRINK_INGREDIENTS_TABLE, MAP_DRINK_INGREDIENTS_COLUMNS)
