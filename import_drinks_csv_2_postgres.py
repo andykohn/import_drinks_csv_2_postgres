@@ -1,7 +1,7 @@
 import boto3
 import psycopg2
 from botocore.exceptions import ClientError
-from lib.KMS_encrypt_decrypt import KMSEncryptDecrypt
+from helpers.KMS_encrypt_decrypt import KMSEncryptDecrypt
 
 HOST = 'drinks-db.ce6hlg7jz41w.us-east-1.rds.amazonaws.com'
 DATABASE = 'drinks_db'
