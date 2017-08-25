@@ -21,8 +21,8 @@ CREATE_TABLE_DRINKS = "CREATE TABLE IF NOT EXISTS drinks ( " + \
 
 CREATE_TABLE_MAP_DRINK_INGREDIENTS = "CREATE TABLE IF NOT EXISTS map_drink_ingredients (" + \
                               "drink_id INT NOT NULL, " + \
-                              "ingredient_id text NOT NULL, " + \
-                              "measurement text, " + \
+                              "ingredient_id INT NOT NULL, " + \
+                              "ingredient_measurement text, " + \
                               "ingredient_order text NOT NULL," + \
                               "PRIMARY KEY(drink_id, ingredient_id)" + \
                               ");"
@@ -33,7 +33,7 @@ DROP_TABLE_MAP_DRINK_INGREDIENTS = "DROP TABLE IF EXISTS map_drink_ingredients;"
 
 # COPY_CSV_INGREDIENTS = "\copy ingredients(ingredient_id, ingredient_name) FROM './csv/ingredients.csv' DELIMITER ',' CSV HEADER;"
 # COPY_CSV_MAP_DRINK = "\copy drinks(drink_id, drink_name, drink_category, drink_alcoholic, drink_glass, drink_instructions, drink_thumbnail, drink_date_modified) FROM './csv/drinks.csv' DELIMITER ',' CSV HEADER;"
-# COPY_CSV_MAP_DRINK_INGREDIENTS = "\copy map_drink_ingredients(drink_id, ingredient_id, measurement, ingredient_order) FROM './csv/map_drink_ingredients.csv' DELIMITER ',' CSV HEADER;"
+# COPY_CSV_MAP_DRINK_INGREDIENTS = "\copy map_drink_ingredients(drink_id, ingredient_id, ingredient_measurement, ingredient_order) FROM './csv/map_drink_ingredients.csv' DELIMITER ',' CSV HEADER;"
 INGREDIENTS_CSV = './csv/ingredients.csv'
 INGREDIENTS_TABLE = 'ingredients'
 INGREDIENTS_COLUMNS = 'ingredient_id, ingredient_name'
@@ -43,7 +43,7 @@ DRINKS_COLUMNS = 'drink_id, drink_name, drink_category, drink_alcoholic, ' + \
                   'drink_glass, drink_instructions, drink_thumbnail, drink_date_modified'
 MAP_DRINK_INGREDIENTS_CSV = './csv/map_drink_ingredients.csv'
 MAP_DRINK_INGREDIENTS_TABLE = 'map_drink_ingredients'
-MAP_DRINK_INGREDIENTS_COLUMNS = 'drink_id, ingredient_id, measurement, ingredient_order'
+MAP_DRINK_INGREDIENTS_COLUMNS = 'drink_id, ingredient_id, ingredient_measurement, ingredient_order'
 
 
 def __execute_sql(conn, sql):
