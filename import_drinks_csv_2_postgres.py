@@ -1,6 +1,7 @@
 import boto3
 import psycopg2
 from botocore.exceptions import ClientError
+from lib.KMS_encrypt_decrypt import KMSEncryptDecrypt
 
 HOST = 'drinks-db.ce6hlg7jz41w.us-east-1.rds.amazonaws.com'
 DATABASE = 'drinks_db'
@@ -69,6 +70,7 @@ def __get_csv_files_from_s3():
         else:
             raise
 
+
 def __execute_psql_copy(conn, csv, table_name, columns_name):
     try:
         print("Coping {}".format(table_name))
@@ -82,36 +84,45 @@ def __execute_psql_copy(conn, csv, table_name, columns_name):
         print(error)
 
 
-# TODO: Critical risk, although it's only a playground,
-# nothing in the DB, and only internal IAM roles can access it, we need to still use KMS to encrypt this.
-def __get_credential():
-
+def __get_password_from_dynamo():
     dynamodb = boto3.resource("dynamodb", region_name='us-east-1',
                               endpoint_url="https://dynamodb.us-east-1.amazonaws.com")
     table = dynamodb.Table('credentials')
+    response = table.get_item(
+        Key={
+            'name': 'rds-drinks_db-drinks_user',
+        }
+    )
+    if 'Item' in response:
+        if 'encrypted_password' in response['Item']:
+            return response['Item']['encrypted_password'].value
+        else:
+            return "No such attribute : encrypted_password"
+    else:
+        return "No key found"
+
+
+# TODO: Critical risk, although it's only a playground,
+# nothing in the DB, and only internal IAM roles can access it, we need to still use KMS to encrypt this.
+def __get_credential():
     try:
-        response = table.get_item(
-            Key={
-                'name': 'rds-drinks_db-drinks_user',
-            }
-        )
+        password_encrypted = __get_password_from_dynamo()
     except ClientError as error:
         print(error.response['Error']['Message'])
+        raise
     else:
-        return response[u'Item'][u'value']
+        password = KMSEncryptDecrypt.decrypt_data(password_encrypted)
+        return password
+        # return response[u'Item'][u'value']
 
 
 def __connect():
-    try:
-        credential = __get_credential()
-        conn = psycopg2.connect(host=HOST, database=DATABASE, port=PORT, user=USER, password=credential)
-        # conn.set_isolation_level(psycopg2.extensions.ISOLATION_LEVEL_AUTOCOMMIT)
-        return conn
-    except Exception as error:
-        print(error)
+    credential = __get_credential()
+    credential = credential.decode("utf-8")
+    conn = psycopg2.connect(host=HOST, database=DATABASE, port=PORT, user=USER, password=credential)
+    # conn.set_isolation_level(psycopg2.extensions.ISOLATION_LEVEL_AUTOCOMMIT)
+    return conn
 
-
-# get all of the db instances
 __conn = __connect()
 __execute_sql(__conn, DROP_TABLE_INGREDIENTS)
 __execute_sql(__conn, DROP_TABLE_DRINKS)
